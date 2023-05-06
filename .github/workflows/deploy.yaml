@@ -37,6 +37,11 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+      - name: Env
+        run: echo >> src/env.ts << EOF
+          export const appId = '${{ vars.SKYWAY_APP_ID }}';
+          export const secret = '${{ secrets.SKYWAY_SECRET }}';
+          EOF
       - name: Build
         run: npm run build
       - name: Setup Pages
