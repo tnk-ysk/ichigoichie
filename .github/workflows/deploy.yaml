@@ -40,7 +40,7 @@ jobs:
       - name: Setup env
         run: |
           pwd
-          echo >> src/env.ts << EOF
+          cat > src/env.ts << EOF
           export const appId = '${{ vars.SKYWAY_APP_ID }}';
           export const secret = '${{ secrets.SKYWAY_SECRET }}';
           EOF
