@@ -6,20 +6,23 @@ import { useCookies } from 'react-cookie';
 import './App.css'
 import Home from './Home'
 import Room from './Room'
+import Search from './Search'
 import Setting from './Setting'
 
+export const basename = '/ichigoichie';
 
 export default function App() {
   // const [count, setCount] = useState(0)
   const [cookies] = useCookies(['setting']);
 
   return (
-    <BrowserRouter basename='/ichigoichie'>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route index element={<Home />} />
-        <Route path="/:roomName/setting" element={<Setting />} />
-        <Route path="/:roomName" element={<Room />} />
-        <Route path="/:roomName" element={cookies.setting ? <Room /> : <Navigate to="setting" />} />
+        {/* <Route path="/:roomName/setting" element={<Setting />} /> */}
+        <Route path="/:roomName" element={<Room view={Search} />} />
+        <Route path="/:roomName/setting" element={<Room view={Setting} />} />
+        {/* <Route path="/:roomName" element={cookies.setting ? <Room /> : <Navigate to="setting" />} /> */}
       </Routes>
     </BrowserRouter>
     // <>

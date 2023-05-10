@@ -1,5 +1,3 @@
-import React, { useContext } from 'react';
-import { appId, secret } from './env';
 import {
   nowInSec,
   SkyWayAuthToken,
@@ -11,17 +9,14 @@ import {
   uuidV4,
   LocalDataStream,
 } from '@skyway-sdk/room';
-import { Mutex } from 'async-mutex';
 
-export const MembersContext = React.createContext([]);
-
-class WebRTC {
+export default class WebRTC {
+  roomName: string | null = null;
   private _token: string;
   // private context: SkyWayContext;
   private _room!: P2PRoom;
   private _member!: LocalP2PRoomMember;
   private _dataStream!: LocalDataStream;
-  private mutex = new Mutex();
   private onDataEvents: Array<CallableFunction> = [];
 
   constructor(
@@ -72,29 +67,27 @@ class WebRTC {
     }).encode(secret);
   }
 
-  get room(): P2PRoom {
-    return this._room;
-  }
-  get member(): LocalP2PRoomMember {
-    return this._member;
-  }
-  get dataStream(): LocalDataStream {
-    return this._dataStream;
-  }
-
-  async join(roomName: string) {
-    this.mutex.runExclusive(async () => {
-      if (this._dataStream) return;
-      this._dataStream = await SkyWayStreamFactory.createDataStream();
-    });
+  // get room(): P2PRoom {
+  //   return this._room;
+  // }
+  // get member(): LocalP2PRoomMember {
+  //   return this._member;
+  // }
+  // get dataStream(): LocalDataStream {
+  //   return this._dataStream;
+  // }
+  private async connect(roomName: string) {
+    this._dataStream = await SkyWayStreamFactory.createDataStream();
     const context = await SkyWayContext.Create(this._token, {
-      log: { level: 'warn', format: 'object' },
+      // log: { level: 'warn', format: 'object' },
     });
+    console.log("b")
     this._room = await SkyWayRoom.FindOrCreate(context, {
       type: 'p2p',
       name: roomName,
     });
     this._member = await this._room.join()
+    console.log("a")
 
     const subscribe = async (publication: any) => {
       if (publication.publisher.id === this._member.id) return;
@@ -103,15 +96,13 @@ class WebRTC {
     this._room.publications.forEach(subscribe);
     this._room.onStreamPublished.add((e) => subscribe(e.publication));
 
+    // this._room.onMemberLeft.add((e) => {
+    //   this._member.unsubscribe(e.member.id);
+    // });
+
+    console.log("publish stream")
     await this._member.publish(this._dataStream);
-    this.attachEvent();
-  }
 
-  onData(func: CallableFunction) {
-    this.onDataEvents.push(func);
-  }
-
-  private attachEvent() {
     this._member.onPublicationSubscribed.add(async ({ stream, subscription }) => {
       if (stream.contentType !== 'data') return;
       console.log(`onPublicationSubscribed: ${subscription.publication.publisher.id}`);
@@ -121,9 +112,22 @@ class WebRTC {
           func(data);
         }
       });
-    })
+    });
+
+    this._room.onMemberLeft.add()
   }
 
-}
+  join(roomName: string) {
+    if (this.roomName != null) return;
+    this.roomName = roomName;
+    this.connect(roomName);
+  }
 
-export default new WebRTC(appId, secret);
+  onData(func: CallableFunction) {
+    this.onDataEvents.push(func);
+  }
+
+  write(data: any) {
+    this._dataStream.write(data);
+  }
+}
