@@ -6,6 +6,15 @@
   <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ichigoichie</title>
+  <script>
+    (function () {
+      const query = window.location.search;
+      if (query.startsWith('?p=')) {
+        const route = decodeURIComponent(query.substr(3));
+        window.history.replaceState(null, null, route);
+      }
+    })();
+  </script>
 </head>
 
 <body>
