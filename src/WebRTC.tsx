@@ -114,7 +114,7 @@ export default class WebRTC {
       });
     });
 
-    this._room.onMemberLeft.add()
+    // this._room.onMemberLeft.add()
   }
 
   join(roomName: string) {
