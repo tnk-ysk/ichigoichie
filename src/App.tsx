@@ -1,6 +1,6 @@
 // import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useCookies } from 'react-cookie';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// import { useCookies } from 'react-cookie';
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import './App.css'
@@ -13,7 +13,7 @@ export const basename = '/ichigoichie';
 
 export default function App() {
   // const [count, setCount] = useState(0)
-  const [cookies] = useCookies(['setting']);
+  // const [cookies] = useCookies(['setting']);
 
   return (
     <BrowserRouter basename={basename}>

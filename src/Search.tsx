@@ -1,15 +1,12 @@
-import React, { useContext, useState, useRef } from 'react';
-import { useCookies } from 'react-cookie';
+import { useRef } from 'react';
+// import { useCookies } from 'react-cookie';
 import { Link, useParams } from 'react-router-dom';
-import { appId, secret } from './env';
-
-// export const MembersContext = React.createContext(new Object());
 
 export default function Search(props: { write: (data: any) => void, members: object }) {
   // const members = useContext(MembersContext);
   const members = props.members
   const { roomName } = useParams();
-  const [cookies] = useCookies(['setting']);
+  // const [cookies] = useCookies(['setting']);
 
   const dataStreamInput = useRef<HTMLInputElement>(null);
   const myId = useRef<HTMLSpanElement>(null);
