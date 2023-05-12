@@ -10,7 +10,8 @@ export default function Search(props: {
   // const members = useContext(MembersContext);
   // const members = props.members
   const { roomName } = useParams();
-  const [memberList, setMemberList] = useState(createMemberList() as Member[]);
+  const memberList = sortMemberList([...props.members.values()] as Member[]);
+  const [filtterdMemberList, setFiltteredMemberList] = useState(memberList);
   const setting = JSON.parse(localStorage.getItem(roomName!) ?? '{}') as Member;
 
   // const [cookies] = useCookies(['setting']);
@@ -22,12 +23,21 @@ export default function Search(props: {
     dataStreamInput.current!.value = '';
   }
 
-  function search(val: string) {
-
+  function search(text: string) {
+    let m = memberList;
+    // TODO: multi space
+    for (const t of text.split(" ")) {
+      m = m.filter((item) => {
+        item.attributes.find((value) => {
+          return value.includes(t);
+        }) !== undefined
+      });
+    }
+    setFiltteredMemberList(m);
   }
 
-  function createMemberList() {
-    return [...props.members.values()].sort((a, b) => {
+  function sortMemberList(members: Member[]) {
+    return members.sort((a, b) => {
       let diff = 0;
       if (setting.attributes.length > 0) {
         diff = calcCosineSimilarity(setting.attributes, a.attributes) - calcCosineSimilarity(setting.attributes, b.attributes);
@@ -55,7 +65,7 @@ export default function Search(props: {
         </Link>
       </div>
       <ul>
-        {memberList.map((item) => (
+        {filtterdMemberList.map((item) => (
           <li key={item.userId}>
 
           </li>
