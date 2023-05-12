@@ -4,10 +4,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import './App.css'
-import Home from './Home'
+import Top from './Top'
 import Room from './Room'
 import Search from './Search'
 import Setting from './Setting'
+import { CookiesProvider } from 'react-cookie'
 
 export const basename = '/ichigoichie';
 
@@ -16,15 +17,17 @@ export default function App() {
   // const [cookies] = useCookies(['setting']);
 
   return (
-    <BrowserRouter basename={basename}>
-      <Routes>
-        <Route index element={<Home />} />
-        {/* <Route path="/:roomName/setting" element={<Setting />} /> */}
-        <Route path="/:roomName" element={<Room view={Search} />} />
-        <Route path="/:roomName/setting" element={<Room view={Setting} />} />
-        {/* <Route path="/:roomName" element={cookies.setting ? <Room /> : <Navigate to="setting" />} /> */}
-      </Routes>
-    </BrowserRouter>
+    <CookiesProvider>
+      <BrowserRouter basename={basename}>
+        <Routes>
+          <Route index element={<Top />} />
+          {/* <Route path="/:roomName/setting" element={<Setting />} /> */}
+          <Route path="/:roomName" element={<Room view={Search} />} />
+          <Route path="/:roomName/setting" element={<Room view={Setting} />} />
+          {/* <Route path="/:roomName" element={cookies.setting ? <Room /> : <Navigate to="setting" />} /> */}
+        </Routes>
+      </BrowserRouter>
+    </CookiesProvider>
     // <>
     //   <div>
     //     <a href="https://vitejs.dev" target="_blank">
