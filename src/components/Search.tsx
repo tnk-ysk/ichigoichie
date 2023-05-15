@@ -1,34 +1,46 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // import { useCookies } from 'react-cookie';
 import { Link, useParams } from 'react-router-dom';
 import { Member } from './Room';
 
 export default function Search(props: {
   write: (data: any) => void,
-  members: Map<string, Member>,
+  members: Array<Member>,
 }) {
+
   // const members = useContext(MembersContext);
   // const members = props.members
   const { roomName } = useParams();
-  const memberList = sortMemberList([...props.members.values()] as Member[]);
-  const [filtterdMemberList, setFiltteredMemberList] = useState(memberList);
+  let memberList = sortMemberList(props.members);
+  console.log("update!!!!" + JSON.stringify(memberList));
+  const [filtterdMemberList, setFiltteredMemberList] = useState([] as Member[]);
+  // console.log("update!!!!2" + JSON.stringify(filtterdMemberList));
   const setting = JSON.parse(localStorage.getItem(roomName!) ?? '{}') as Member;
+
+  const searchInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    console.log("kita")
+    memberList = sortMemberList(props.members);
+    search();
+  }, [props.members])
 
   // const [cookies] = useCookies(['setting']);
 
-  const dataStreamInput = useRef<HTMLInputElement>(null);
+  // function write() {
+  //   props.write(dataStreamInput.current!.value);
+  //   dataStreamInput.current!.value = '';
+  // }
+  // useEffect(() => {
+  //   setFiltteredMemberList
+  // }, [memberList]);
 
-  function write() {
-    props.write(dataStreamInput.current!.value);
-    dataStreamInput.current!.value = '';
-  }
-
-  function search(text: string) {
+  function search() {
+    const text = searchInput.current!.value;
     let m = memberList;
     // TODO: multi space
     for (const t of text.split(" ")) {
       m = m.filter((item) => {
-        item.attributes.find((value) => {
+        item.userName.includes(t) || item.attributes.find((value) => {
           return value.includes(t);
         }) !== undefined
       });
@@ -57,9 +69,7 @@ export default function Search(props: {
   return (
     <>
       <div>
-        <input id="search" type="text" onChange={
-          (e) => { search(e.target.value) }
-        } />
+        <input id="search" type="text" ref={searchInput} onChange={search} />
         <Link to={`/${roomName}/setting`}>
           Setting
         </Link>
@@ -67,20 +77,18 @@ export default function Search(props: {
       <ul>
         {filtterdMemberList.map((item) => (
           <li key={item.userId}>
+            <div>{item.userName}</div>
+            <ul>
+              {item.attributes.map((attr) => (
+                <li>{attr}</li>
+              ))}
+            </ul>
+            <div>{item.userId}</div>
+            <div>{item.state}</div>
 
           </li>
         ))}
       </ul>
-      <div>
-        {/* <button id="join" onClick={join}>join</button> */}
-      </div>
-
-
-
-      <div>
-        write dataStream: <input id="data-stream" type="text" ref={dataStreamInput} />
-        <button id="write" onClick={write}>write</button>
-      </div>
     </>
   )
 }

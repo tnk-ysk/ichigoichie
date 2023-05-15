@@ -5,7 +5,7 @@ import { Member } from './Room';
 
 export default function Setting(props: {
   write: (data: any) => void,
-  members: Map<string, Member>,
+  members: Array<Member>,
 }) {
   const { roomName } = useParams();
   // const [cookies, setCookie] = useCookies([roomName!]);
@@ -21,6 +21,7 @@ export default function Setting(props: {
   useEffect(() => {
     const setting = {
       userId: userId,
+      publisherId: "",
       userName: userName,
       attributes: attributes,
     };
@@ -57,6 +58,7 @@ export default function Setting(props: {
 
   return (
     <>
+      {console.log(JSON.stringify(attributes))}
       <div>
         <Link to={`/${roomName}`}>
           Room

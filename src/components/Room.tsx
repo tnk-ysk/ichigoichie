@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { appId, secret } from '../env';
 import WebRTC from '../api/WebRTC';
 
 export type Member = {
   userId: string,
-  userName: number,
+  publisherId: string,
+  userName: string,
   attributes: Array<string>,
   state: string,
 };
@@ -21,26 +22,61 @@ const client = new WebRTC(appId, secret);
 export default function Room(props: {
   view: (props: {
     write: (data: any) => void;
-    members: Map<string, Member>;
+    members: Array<Member>;
   }) => JSX.Element
 }) {
   const { roomName } = useParams();
-  const [membersMap, setMembersMap] = useState(new Map<string, Member>());
+  const [membersList, setMembersList] = useState([...members.values()]);
+
+  useEffect(() => { console.log(membersList.length) }, [membersList])
 
   client.join(roomName!);
-  client.onData((data: Data) => {
+  // const setting = JSON.parse(localStorage.getItem(roomName!) ?? '{}');
+  client.onData((publisherId: string, data: Data) => {
     // TODO: member join
     switch (data.type) {
       case 'update':
-        if (members.get(data.body.userId) === data.body) return;
-        console.log("set member")
+        if (JSON.stringify(data.body) === JSON.stringify(members.get(data.body.userId))) return;
+        const oldMembers: string[] = [];
+        members.forEach((item, key) => {
+          if (item.userId === data.body.userId) {
+            oldMembers.push(key);
+          }
+        });
+        oldMembers.forEach((item) => {
+          members.delete(item);
+        });
+
+        console.log(`update member: ${publisherId}`)
+        data.body.publisherId = publisherId;
         members.set(data.body.userId, data.body);
-        setMembersMap({ ...members });
+        console.log("AAA" + JSON.stringify({ ...members }))
+        console.log("BBB" + JSON.stringify(members))
+        console.log("CCC" + JSON.stringify(data.body))
+        console.log("DDD" + JSON.stringify([...members.values()]))
+        console.log("EEE" + JSON.stringify(members.get(data.body.userId)))
+        console.log("FFF" + JSON.stringify(Object.fromEntries(new Map(members))))
+        const v = [...members.values()];
+        console.log("GGG" + JSON.stringify(v));
+        // setTimeout(() => {
+        // setMembersList(v);
+        // }, 0)
+        setMembersList([...members.values()])
         break;
       default:
         console.error(`Unknown data type: ${data.type}`);
-
+        console.error(JSON.stringify(data));
     }
+  });
+
+  client.onMemberLeft((e) => {
+    console.log(`onLeft: ${e.member.id}`)
+    members.forEach((item, key) => {
+      if (item.publisherId === e.member.id) {
+        item.state = "offline"
+        members.set(key, item);
+      }
+    });
   });
 
   function write(data: any) {
@@ -49,7 +85,9 @@ export default function Room(props: {
 
   return (
     <>
-      <props.view write={write} members={membersMap} />
+    {console.log("update view" + [...members.values()].length)}
+    {console.log(props.view)}
+      <props.view write={write} members={[...members.values()]} />
     </>
   )
 }
